@@ -1,14 +1,16 @@
 from django.http import Http404
 from rest_framework import status
 from rest_framework.views import APIView
-from rest_framework.parsers import MultiPartParser, JSONParser
+from rest_framework.parsers import JSONParser
+from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from .models import *
 from .serializers import *
 
 
 class CategoryListAPIView(APIView):
-    parser_classes = (MultiPartParser, JSONParser)
+    parser_classes = [JSONParser]
+    renderer_classes = [JSONRenderer]
     
     def get(self, request):
         categories = Category.objects.all()
@@ -24,7 +26,8 @@ class CategoryListAPIView(APIView):
 
 
 class CategoryDetailAPIView(APIView):
-    parser_classes = (MultiPartParser, JSONParser)
+    parser_classes = [JSONParser]
+    renderer_classes = [JSONRenderer]
 
     def get_object(self, pk):
         try:
@@ -41,6 +44,6 @@ class CategoryDetailAPIView(APIView):
         return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
     def delete(self, request, pk):
-        student = self.get_object(pk)
-        student.delete()
+        category = self.get_object(pk)
+        category.delete()
         return Response()
