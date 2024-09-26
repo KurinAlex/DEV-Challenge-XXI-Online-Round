@@ -1,52 +1,35 @@
 import time
 import threading
 from django.http import Http404
-from rest_framework import status
+from rest_framework import status, generics, mixins
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import *
 from .serializers import *
 
 
-class CategoryListAPIView(APIView):
-
-    def get(self, request):
-        categories = Category.objects.all()
-        serializer = CategorySerializer(categories, many=True)
-        return Response(serializer.data)
-
-    def post(self, request):
-        serializer = CategorySerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+class CategoryListCreateAPIView(generics.ListCreateAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
 
 
-class CategoryDetailAPIView(APIView):
+class CategoryUpdateDestroyAPIView(generics.GenericAPIView, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
 
-    def get_object(self, pk):
-        try:
-            return Category.objects.get(pk=pk)
-        except Category.DoesNotExist:
-            raise Http404
+    def put(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
 
-    def put(self, request, pk):
-        category = self.get_object(pk)
-        serializer = CategorySerializer(category, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
-
-    def delete(self, request, pk):
-        category = self.get_object(pk)
-        category.delete()
-        return Response()
+    def delete(self, request, *args, **kwargs):
+        response = self.destroy(request, *args, **kwargs)
+        response.status_code = status.HTTP_200_OK
+        return response
 
 
 processing_status = {}
 
 
-class CallGetAPIView(APIView):
+class CallRetrieveAPIView(APIView):
 
     def get_object(self, pk):
         try:
@@ -67,7 +50,7 @@ class CallGetAPIView(APIView):
             return Response(serializer.data)
 
 
-class CallPostAPIView(APIView):
+class CallCreateAPIView(APIView):
 
     def process_file(file_url, id):
         time.sleep(10)
@@ -82,7 +65,7 @@ class CallPostAPIView(APIView):
         id = call.pk
         processing_status[id] = {"status": "processing"}
 
-        thread = threading.Thread(target=CallPostAPIView.process_file, args=(audio_url, id))
+        thread = threading.Thread(target=CallCreateAPIView.process_file, args=(audio_url, id))
         thread.start()
 
         call = Call.objects.create()

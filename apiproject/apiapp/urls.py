@@ -2,8 +2,8 @@ from django.urls import path
 from .views import *
 
 urlpatterns = [
-    path("category", CategoryListAPIView.as_view()),
-    path("category/<int:pk>", CategoryDetailAPIView.as_view()),
-    path("call/<int:pk>", CallGetAPIView.as_view()),
-    path("call", CallPostAPIView.as_view()),
+    path("category", CategoryListCreateAPIView.as_view()),
+    path("category/<pk>", CategoryUpdateDestroyAPIView.as_view()),
+    path("call/<pk>", CallRetrieveAPIView.as_view()),
+    path("call", CallCreateAPIView.as_view()),
 ]
