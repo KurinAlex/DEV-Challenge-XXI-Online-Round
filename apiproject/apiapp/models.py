@@ -2,21 +2,21 @@ from django.db import models
 from django.contrib.postgres.fields import ArrayField
 
 
-class EmotionalTone(models.enums.TextChoices):
-    NEUTRAL = 'NEU', 'Neutral'
-    POSITIVE = 'POS', 'Positive'
-    NEGATIVE = 'NEG', 'Negative'
-    ANGRY = 'ANG', 'Angry'
+class EmotionalTone(models.IntegerChoices):
+    NEUTRAL = 0, "Neutral"
+    POSITIVE = 1, "Positive"
+    NEGATIVE = 2, "Negative"
+    ANGRY = 3, "Angry"
 
 
 class Category(models.Model):
-    title = models.CharField()
-    points = ArrayField(base_field=models.CharField(max_length=200), blank=True)
+    title = models.CharField(unique=True)
+    points = ArrayField(base_field=models.CharField(), blank=True)
 
 
 class Call(models.Model):
-    name = models.CharField()
-    location = models.CharField()
-    emotional_tone = models.CharField(max_length=3, choices=EmotionalTone.choices, default=EmotionalTone.NEUTRAL)
-    text = models.CharField()
+    name = models.CharField(null=True)
+    location = models.CharField(null=True)
+    emotional_tone = models.IntegerField(choices=EmotionalTone.choices, null=True)
+    text = models.CharField(null=True)
     categories = models.ManyToManyField(Category)
