@@ -1,3 +1,5 @@
+import os
+from django.core import validators
 from rest_framework import serializers
 from .models import *
 
@@ -21,10 +23,13 @@ class CallSerializer(serializers.ModelSerializer):
 
 
 class AudioRequestSerializer(serializers.Serializer):
-    audio_url = serializers.URLField(required=True)
+    audio_url = serializers.CharField(required=True)
 
     def validate_audio_url(self, value):
-        # You can add custom validation logic here if needed, e.g., check file type.
+        if not os.path.exists(value):
+            validator = validators.URLValidator()
+            validator(value)
+
         if not value.endswith((".mp3", ".wav")):
             raise serializers.ValidationError("The audio URL must point to a valid audio file (e.g., .mp3, .wav).")
 
