@@ -1,11 +1,16 @@
-import time
 import threading
+import json
+import wave
+import vosk
+import os
 from django.http import Http404
+from django.shortcuts import get_object_or_404
 from rest_framework import status, generics, mixins
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import *
 from .serializers import *
+from requests import get
 
 
 class CategoryListCreateAPIView(generics.ListCreateAPIView):
@@ -31,18 +36,12 @@ processing_status = {}
 
 class CallRetrieveAPIView(APIView):
 
-    def get_object(self, pk):
-        try:
-            return Call.objects.get(pk=pk)
-        except Call.DoesNotExist:
-            raise Http404
-
     def get(self, request, pk):
-        call = self.get_object(pk=pk)
-        if pk not in processing_status:
+        call = get_object_or_404(Call, pk=pk)
+        if int(pk) not in processing_status:
             raise Http404
 
-        status_info = processing_status[pk]
+        status_info = processing_status[int(pk)]
         if status_info["status"] == "processing":
             return Response(status=status.HTTP_202_ACCEPTED)
         else:
@@ -52,9 +51,33 @@ class CallRetrieveAPIView(APIView):
 
 class CallCreateAPIView(APIView):
 
-    def process_file(file_url, id):
-        time.sleep(10)
-        processing_status[id] = {"status": "completed", "result": "File processed successfully!"}
+    def process_file(file, id):
+        if os.path.exists(file):
+            file_stream = open(file, "rb")
+        else:
+            response = get(file, stream=True)
+            file_stream = response.raw
+
+        with wave.open(file_stream) as wf:
+            model = vosk.Model(lang="en-us")
+            rec = vosk.KaldiRecognizer(model, wf.getframerate())
+
+            while True:
+                data = wf.readframes(wf.getframerate())
+                if len(data) == 0:
+                    break
+
+                rec.AcceptWaveform(data)
+
+        file_stream.close()
+
+        call = get_object_or_404(Call, pk=id)
+        text = json.loads(rec.FinalResult())["text"]
+
+        call.text = text
+        call.save()
+
+        processing_status[id] = {"status": "completed"}
 
     def post(self, request):
         input_serializer = AudioRequestSerializer(data=request.data)
