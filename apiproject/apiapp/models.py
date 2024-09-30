@@ -19,4 +19,5 @@ class Call(models.Model):
     location = models.CharField(null=True)
     emotional_tone = models.IntegerField(choices=EmotionalTone.choices, null=True)
     text = models.CharField(null=True)
-    categories = models.ManyToManyField(Category)
+    categories = models.ManyToManyField(Category, related_name="calls")
+    task_id = models.CharField(null=True)

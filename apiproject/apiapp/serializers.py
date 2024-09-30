@@ -1,5 +1,3 @@
-import os
-from django.core import validators
 from rest_framework import serializers
 from .models import *
 
@@ -13,7 +11,7 @@ class CategorySerializer(serializers.ModelSerializer):
 class CallSerializer(serializers.ModelSerializer):
     class Meta:
         model = Call
-        fields = "__all__"
+        fields = ["id", "name", "location", "text", "emotional_tone", "categories"]
 
     emotional_tone = serializers.CharField(source="get_emotional_tone_display")
     categories = serializers.SerializerMethodField()
@@ -23,14 +21,10 @@ class CallSerializer(serializers.ModelSerializer):
 
 
 class AudioRequestSerializer(serializers.Serializer):
-    audio_url = serializers.CharField(required=True)
+    audio_url = serializers.URLField(required=True)
 
     def validate_audio_url(self, value):
-        if not os.path.exists(value):
-            validator = validators.URLValidator()
-            validator(value)
-
         if not value.endswith((".mp3", ".wav")):
-            raise serializers.ValidationError("The audio URL must point to a valid audio file (e.g., .mp3, .wav).")
+            raise serializers.ValidationError("The URL must point to .mp3 or .wav audio file.")
 
         return value
