@@ -1,15 +1,14 @@
-from django.shortcuts import get_object_or_404
+"""
+Web API controllers (Django views)
+"""
 
 from rest_framework import status, generics, mixins
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from celery import uuid
-from celery.result import AsyncResult
-
+from .services import *
 from .models import *
 from .serializers import *
-from .tasks import process_file
 
 
 class CategoryListCreateAPIView(generics.ListCreateAPIView):
@@ -33,14 +32,12 @@ class CategoryUpdateDestroyAPIView(generics.GenericAPIView, mixins.UpdateModelMi
 class CallRetrieveAPIView(APIView):
 
     def get(self, request, pk):
-        call = get_object_or_404(Call, pk=pk)
-        result = AsyncResult(call.task_id)
-
-        if result.ready():
+        call = get_call_if_processed(pk)
+        if call is None:
+            return Response(status=status.HTTP_202_ACCEPTED)
+        else:
             serializer = CallSerializer(call)
             return Response(serializer.data)
-        else:
-            return Response(status=status.HTTP_202_ACCEPTED)
 
 
 class CallCreateAPIView(APIView):
@@ -50,9 +47,6 @@ class CallCreateAPIView(APIView):
         input_serializer.is_valid(raise_exception=True)
         audio_url = input_serializer.validated_data["audio_url"]
 
-        task_id = uuid()
-        call = Call.objects.create(task_id=task_id)
+        call_id = post_call(audio_url)
 
-        process_file.apply_async((call.pk, audio_url), task_id=task_id)
-
-        return Response({"id": call.pk})
+        return Response({"id": call_id})

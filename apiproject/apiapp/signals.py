@@ -1,18 +1,24 @@
+"""
+Database models signals (callbacks for model changes)
+"""
+
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from celery import uuid
+import celery
 
 from .models import *
-from .tasks import recategorize_call
 
 
 @receiver(post_save, sender=Category)
 def handle_category_update(sender, instance: Category, **kwargs):
+
+    # If new category was created we should recategorize all calls.
+    # If category was updated, we should update only calls, associated with it.
     if kwargs["created"]:
         calls = Call.objects.all()
     else:
         calls = instance.calls
 
     for call in calls:
-        recategorize_call.delay(call.pk)
+        celery.signature("apiapp.tasks.recategorize_call", args=(call.pk)).delay()

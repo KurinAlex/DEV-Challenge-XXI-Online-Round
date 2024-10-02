@@ -1,5 +1,5 @@
 """
-Django settings for apiproject project.
+Django settings for application.
 """
 
 from pathlib import Path
@@ -10,7 +10,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = environ.get("DJANGO_SECRET_KEY")
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0"]
-
 
 INSTALLED_APPS = [
     "django.contrib.contenttypes",

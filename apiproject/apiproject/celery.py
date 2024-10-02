@@ -1,3 +1,8 @@
+"""
+Application Celery worker configuration.
+"""
+
+
 import os
 
 from celery import Celery
