@@ -1,3 +1,5 @@
+name: 79475_devchallenge_21_test
+
 services:
   postgres:
     image: postgres
