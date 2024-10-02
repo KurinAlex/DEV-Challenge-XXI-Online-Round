@@ -1,8 +1,8 @@
 django
 djangorestframework
 psycopg2
-django-celery-results
 celery
+django-celery-results
 pydub
 vosk
 torch

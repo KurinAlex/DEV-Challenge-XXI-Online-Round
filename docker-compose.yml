@@ -10,36 +10,32 @@ services:
     image: rabbitmq
     ports:
       - "${RABBITMQ_PORT}:${RABBITMQ_PORT}"
-      - "15672:15672"
-    env_file:
-      - .env
-
-  django:
-    build: 
-      context: .
-      dockerfile: Dockerfile
-    command:
-      bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:${DJANGO_PORT}"
-    volumes:
-      - ./apiproject/:/usr/src/app/
-      - /mnt/network-share:/app/data
-    ports:
-      - "${DJANGO_PORT}:${DJANGO_PORT}"
-    depends_on:
-      - postgres
-      - rabbitmq
     env_file:
       - .env
 
   celery:
-    build: 
+    build:
       context: .
-      dockerfile: Dockerfile.celery
-    command:
-      bash -c "celery -A apiproject worker -l INFO"
+      dockerfile: docker/Dockerfile
+    command: bash -c "celery -A apiproject worker -l INFO"
     depends_on:
-      - django
       - rabbitmq
+    env_file:
+      - .env
+
+  django:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.app
+    command: >
+      bash -c "python manage.py migrate && python manage.py loaddata seed-data.json && python manage.py runserver 0.0.0.0:${DJANGO_PORT}"
+    volumes:
+      - ./apiproject/:/usr/src/app/
+    ports:
+      - "${DJANGO_PORT}:${DJANGO_PORT}"
+    depends_on:
+      - postgres
+      - celery
     env_file:
       - .env
 
