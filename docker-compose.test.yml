@@ -1,0 +1,24 @@
+name: 79475_devchallenge_21_test
+
+services:
+  postgres:
+    image: postgres
+    volumes:
+      - pgdbdata:/var/lib/postgresql/data
+    env_file:
+      - .env
+
+  tester:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    command: bash -c "python manage.py test && python manage.py test_coverage"
+    volumes:
+      - ./apiproject/:/usr/src/app/
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+
+volumes:
+  pgdbdata: null

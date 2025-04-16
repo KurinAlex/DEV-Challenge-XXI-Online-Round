@@ -1,0 +1,62 @@
+[
+    {
+        "model": "apiapp.Category",
+        "pk": 1,
+        "fields": {
+            "title": "Visa and Passport Services",
+            "points": [
+                "Application processing times",
+                "Visa types and requirements",
+                "Passport renewal or replacement"
+            ]
+        }
+    },
+    {
+        "model": "apiapp.Category",
+        "pk": 2,
+        "fields": {
+            "title": "Diplomatic Inquiries",
+            "points": [
+                "Diplomatic communication protocols",
+                "Requests for immunity or privileges",
+                "Handling international disputes"
+            ]
+        }
+    },
+    {
+        "model": "apiapp.Category",
+        "pk": 3,
+        "fields": {
+            "title": "Travel Advisories",
+            "points": [
+                "Security risks in specific regions",
+                "Health advisories and vaccination needs",
+                "Political unrest affecting travel"
+            ]
+        }
+    },
+    {
+        "model": "apiapp.Category",
+        "pk": 4,
+        "fields": {
+            "title": "Consular Assistance",
+            "points": [
+                "Emergency support for citizens abroad",
+                "Legal or medical help while traveling",
+                "Repatriation services"
+            ]
+        }
+    },
+    {
+        "model": "apiapp.Category",
+        "pk": 5,
+        "fields": {
+            "title": "Trade and Economic Cooperation",
+            "points": [
+                "Trade agreements and tariffs",
+                "Encouraging foreign investments",
+                "Removing trade barriers"
+            ]
+        }
+    }
+]

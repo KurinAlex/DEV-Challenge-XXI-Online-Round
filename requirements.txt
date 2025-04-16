@@ -1,0 +1,9 @@
+django
+djangorestframework
+psycopg2
+celery
+django-celery-results
+pydub
+vosk
+torch
+transformers
